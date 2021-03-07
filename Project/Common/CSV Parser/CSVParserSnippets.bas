@@ -55,3 +55,16 @@ Private Sub OpenParseExcelTable()
     CSVFileParser.Parse
 End Sub
 
+
+Private Sub Save()
+    Dim CSVFileParser As CSVParser
+    Dim CSVParserType As CSVParserClass: CSVParserType = CSVParserClass.CSVParserBasicVBA
+    Dim CSVFileName As String: CSVFileName = "Contacts.xsv"
+    Dim FieldSeparator As String: FieldSeparator = ","
+    Dim TableRange As Excel.Range: Set TableRange = Nothing
+    Dim TableName As String: TableName = vbNullString
+    
+    Set CSVFileParser = CSVParser.Create(CSVFileName, FieldSeparator, CSVParserType, TableRange, TableName)
+    CSVFileParser.Parse
+    CSVFileParser.Save
+End Sub

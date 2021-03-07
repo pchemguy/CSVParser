@@ -333,3 +333,32 @@ Attribute WSheetTable.VB_Description = "Places data table onto an Excel workshee
     TableHeaderRange.Name = this.TableName & "Header"
     TableBodyRange.Name = this.TableName & "Body"
 End Sub
+
+
+Public Sub Save()
+    Dim FieldSeparator As String
+    FieldSeparator = IIf(Len(this.FieldSeparator) > 0, this.FieldSeparator, Chr(9))
+    Dim FieldIndex As Long
+    Dim FieldCount As Long: FieldCount = UBound(this.FieldNames, 1)
+    Dim RecordIndex As Long
+    Dim RecordCount As Long: RecordCount = UBound(this.Records, 1)
+    
+    Dim TableRows As Variant: ReDim TableRows(0 To RecordCount)
+    Dim Record As Variant: ReDim Record(1 To FieldCount)
+    
+    TableRows(0) = Join(this.FieldNames, FieldSeparator)
+    For RecordIndex = 1 To RecordCount
+        For FieldIndex = 1 To FieldCount
+            Record(FieldIndex) = this.Records(RecordIndex, FieldIndex)
+        Next FieldIndex
+        TableRows(RecordIndex) = Join(Record, FieldSeparator)
+    Next RecordIndex
+    Dim Buffer As Variant
+    Buffer = Join(TableRows, vbNewLine)
+    Dim FileName As String
+    FileName = Left$(this.CSVFileName, Len(this.CSVFileName) - 4) & "_out.xsv"
+    Dim FileHandle As Long: FileHandle = FreeFile
+    Open FileName For Output As #FileHandle
+    Print #FileHandle, Buffer;
+    Close #FileHandle
+End Sub
