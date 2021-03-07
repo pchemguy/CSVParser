@@ -43,6 +43,33 @@ End Sub
 
 Private Sub Class_Terminate()
     Set this.FieldMap = Nothing
+    RestoreExcelApp Application
+End Sub
+
+
+' In practice, this optimization can only provide advantage
+' if used outside the class in combination with bulk file
+' parsing. Even then for small to moderate file sizes, basic
+' parser, if sufficient, provides and order of magnitude higher
+' performance (compared on a file with a header, 8 fields and
+' 1000 records).
+' When used inside the class, performance improvement
+' is barely significant, if at all.
+Private Sub RestrictExcelApp(ByVal App As Excel.Application)
+    App.ScreenUpdating = False
+    'App.Visible = False ' This only slow things down
+    App.AutomationSecurity = msoAutomationSecurityForceDisable
+    App.EnableEvents = False
+    App.Calculation = xlCalculationManual
+End Sub
+
+
+Private Sub RestoreExcelApp(ByVal App As Excel.Application)
+    App.Calculation = xlCalculationAutomatic
+    App.EnableEvents = True
+    App.AutomationSecurity = msoAutomationSecurityLow
+    'App.Visible = True
+    App.ScreenUpdating = True
 End Sub
 
 
@@ -202,6 +229,7 @@ Attribute WBOpenParse.VB_Description = "Parses file via the Workbook.Open routin
         Name TempFile As this.CSVFileName
     End If
     
+    RestrictExcelApp Application
     Dim TableRange As Excel.Range
     Dim CSVWBook As Excel.Workbook
     Set CSVWBook = Application.Workbooks.Open(FileName:=this.CSVFileName, Format:=XlFileFormat.xlCSV, Delimiter:=FieldSeparator)
@@ -209,8 +237,9 @@ Attribute WBOpenParse.VB_Description = "Parses file via the Workbook.Open routin
         Set TableRange = .Sheets(1).UsedRange
         this.FieldNames = Application.WorksheetFunction.Index(.Sheets(1).UsedRange.Value, HEADER_ROW_INDEX)
         this.Records = TableRange.Rows(2).Resize(TableRange.Rows.Count - 1, TableRange.Columns.Count)
-        .Close
+        .Close SaveChanges:=False
     End With
+    RestoreExcelApp Application
 
     If TempFile <> vbNullString Then
         Name this.CSVFileName As TempFile
@@ -238,6 +267,7 @@ Attribute WBOpenTextParse.VB_Description = "Parses file via the Workbook.OpenTex
         Name TempFile As this.CSVFileName
     End If
     
+    RestrictExcelApp Application
     Dim CSVWBook As Excel.Workbook
     If this.FieldSeparator = vbNullString Then
         Application.Workbooks.OpenText FileName:=this.CSVFileName, _
@@ -258,8 +288,9 @@ Attribute WBOpenTextParse.VB_Description = "Parses file via the Workbook.OpenTex
         Set TableRange = .Sheets(1).UsedRange
         this.FieldNames = Application.WorksheetFunction.Index(.Sheets(1).UsedRange.Value, HEADER_ROW_INDEX)
         this.Records = TableRange.Rows(2).Resize(TableRange.Rows.Count - 1, TableRange.Columns.Count)
-        .Close
+        .Close SaveChanges:=False
     End With
+    RestoreExcelApp Application
     
     If TempFile <> vbNullString Then
         Name this.CSVFileName As TempFile
