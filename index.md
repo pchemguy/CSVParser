@@ -1,5 +1,9 @@
-## CSVParser
+Excel VBA provides several functionalities for parsing text delimited files:
 
-Implements two CSV parsing approaches for delimited files: pure VBA (very basic parser) based on the "Split" function, and Excel assisted parsing using either `Workbook.Open` or `Workbook.OpenText`. While the Excel parser is more flexible, it is 1-2 orders of magnitude slower than the basic parser. Excel parser ignores parsing options if the file has a ".csv" extension. So to ensure correct parsing, if the file provided has a ".csv" extension, it is temporarily renamed, parsed, and renamed back.
+- basic file I/O and the Split function (basic parser);
+- Workbook.Open/Workbook.OpenText functions;
+- Excel's QueryTable.
 
-Main module - "Project/Common/CSV Parser/CSVParser.cls" - `CSVParser` class. Usage examples - "Project/Common/CSV Parser/CSVParserSnippets.bas" and "Project/Common/CSV Parser/CSVParserTests.bas".
+CSVParser implements the first two options. The basic parser is less flexible but at least 20x faster than Workbook.Open/Workbook.OpenText. Excel parser (Workbook.Open/Workbook.OpenText) ignores parsing options if the file has a ".csv" extension. So to ensure correct parsing of a ".csv" file, it is temporarily renamed, parsed, and renamed back.
+
+"Project/Common/CSV Parser/CSVParser.cls" contains the CSVParser class. "Project/Common/CSV Parser/CSVParserSnippets.bas" and "Project/Common/CSV Parser/CSVParserTests.bas" modules contain usage examples and tests. The repository root also contains two test files "Contacts.xsv" and "Contacts.csv" with identical content.
